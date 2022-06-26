@@ -14,14 +14,12 @@ enum command {
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(11, PIN, NEO_GRB + NEO_KHZ800);
 int NUM_LEDS = strip.numPixels();
+int LED_BRIGHTNESS = 10;
 
-int lastindex = 0;
-byte randLEDNumber = 0;
-
+// serial
 char serialInput;
-String serialString = "";
 
-void setLEDColor() {
+void setLEDStartColor() {
   Serial.println("Set Color");
   for (int i = 0; i < NUM_LEDS; i++) {
     strip.setPixelColor(i, strip.Color(255, 255, 255));
@@ -37,45 +35,39 @@ void clearLEDs() {
 }
 
 void setHealthBar(char health) {
-  //TODO: over 10 Hearts
+  //TODO: over 10 Hearts (> 40 health)
   clearLEDs();
 
   int leftOverHeart = health % 4;
   int barCeil = floor(health / 4) + 1;
 
   for (int i = 0; i <= barCeil; i++) {
-    if (barCeil > i) {
-      strip.setPixelColor((NUM_LEDS - i), strip.Color(255, 0, 0));  
-    } else {
-      strip.setPixelColor((NUM_LEDS - i), strip.Color(60 * leftOverHeart, 0, 0));  
-    }
+      if (barCeil > i) {
+        strip.setPixelColor((NUM_LEDS - (i % 10)), strip.Color(255, (i > 10) ? 255 : 0, 0));  
+      } else {
+        strip.setPixelColor((NUM_LEDS - (i % 10)), strip.Color((i > 10) ? 255 : 60 * leftOverHeart, (i > 10) ? 60 * leftOverHeart : 0, 0));  
+      }
   }
   strip.show();
 }
 
 void setup() {
-
   Serial.begin(9600);
-  Serial.println();
   Serial.println("Start");
 
-//Strip starten.  
   strip.begin();
-  strip.setBrightness(10);
-  setLEDColor();
+  strip.setBrightness(LED_BRIGHTNESS);
+  setLEDStartColor();
 }
  
  
 void loop() {
   if (Serial.available() > 0) {
     int rlen = Serial.readBytes(buf, BUFFER_SIZE);
-  
-    // Handle receiving inputs
+
     // TODO: Verify
-  
     char commandByte = buf[0];
     char valueByte = buf[1];
-    setHealthBar(valueBytes);
     
     switch(commandByte){
       case 0:
@@ -86,6 +78,7 @@ void loop() {
         break;
     }
 
+    // just for testing
     Serial.write(buf, BUFFER_SIZE);
   }
 }
