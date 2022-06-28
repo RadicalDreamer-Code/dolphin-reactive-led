@@ -5,12 +5,15 @@
 const int BUFFER_SIZE = 4;
 char buf[BUFFER_SIZE];
 
-enum command {
-    turnOff = 0,
-    turnOn = 1,
-    changeColor = 2,
-    changeHealth = 3,
-};
+enum Commands {
+    turnOff = 0x00,
+    turnOn = 0x01,
+    changeColor = 0x02,
+    setHealth = 0x03,
+    setWindwakerMode = 0x04,
+    setWindwakerBeat = 0x05,
+    openDoor = 0x06
+} command;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(11, PIN, NEO_GRB + NEO_KHZ800);
 int NUM_LEDS = strip.numPixels();
@@ -34,6 +37,17 @@ void clearLEDs() {
   strip.show();
 }
 
+void midToSideClear() {
+  setLEDStartColor();
+  int mid = ceil(NUM_LEDS / 2) + 1;
+  for (int i = 0; i < mid; i++) {
+    strip.setPixelColor((NUM_LEDS - mid) - i, strip.Color(0, 0, 0));
+    strip.setPixelColor((NUM_LEDS - mid) + i, strip.Color(0, 0, 0));
+    strip.show();
+    delay(50);
+  }
+}
+
 void setHealthBar(char health) {
   //TODO: over 10 Hearts (> 40 health)
   clearLEDs();
@@ -49,6 +63,22 @@ void setHealthBar(char health) {
       }
   }
   strip.show();
+}
+
+void blinkLEDs() {
+  for (int i = 0; i < NUM_LEDS; i++) {
+    strip.setPixelColor(i, strip.Color(255, 255, 255));
+  }
+  strip.show();
+  delay(100);
+  // fade out
+  for (int j = 0; j <= 10; j++) {
+    for (int i = 0; i < NUM_LEDS; i++) {
+     strip.setPixelColor(i, strip.Color(25 * j, 25 * j, 25 * j));
+    }
+    strip.show();
+    delay(30);  
+  }
 }
 
 void setup() {
@@ -70,8 +100,20 @@ void loop() {
     char valueByte = buf[1];
     
     switch(commandByte){
-      case 0:
+      case setHealth:
         setHealthBar(valueByte);
+        break;
+
+      case turnOff:
+        clearLEDs();
+        break;
+
+      case turnOn:
+        blinkLEDs();
+        break;
+
+      case openDoor:
+        midToSideClear();
         break;
   
       default:
