@@ -1,0 +1,3 @@
+[submodule "client/windwaker-dolphin-api"]
+	path = client/ww-led-control/windwaker-dolphin-api
+	url = https://github.com/RadicalDreamer-Code/windwaker-dolphin-api.git

@@ -1,0 +1,59 @@
+﻿@page "/serial"
+
+<h1>Serial Port</h1>
+
+<label>Select Port: </label>
+<select class="form-select" name="port">
+    @foreach (var portName in portnames)
+    {
+        <option value="@portName">@portName</option>
+    }
+</select>
+<br />
+<label>Baud-Rate: </label>
+<input type="text" class="form-control" placeholder="BaudRate" aria-label="baudRate" aria-describedby="basic-addon1" value="9600"><br />
+<button type="button" class="btn btn-success" onclick="@RunSerial">Run</button>
+<button type="button" class="btn btn-success" onclick="@RunSerial">Stop</button>
+<button type="button" class="btn btn-error" onclick="@TurnOffLights">Turn off lights</button>
+
+
+@code {
+    private Client.SerialManager serialManager = new Client.SerialManager();
+    private string[] portnames;
+
+    private string selectedPortName = "COM12";
+    private int selectedBaudRate = 9600;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        portnames = serialManager.GetAvailiblePorts();
+    }
+
+    private void RunSerial()
+    {
+        if (!serialManager.IsOpen())
+            serialManager.Initialize(selectedPortName, selectedBaudRate);
+
+        byte[] messageBytes = { (byte) Client.SerialManager.Commands.TURN_ON, 0x00, 0x00, 0x00 };
+        serialManager.WriteMessage(messageBytes);
+    }
+
+    private void TurnOffLights()
+    {
+        byte[] messageBytes = { (byte) Client.SerialManager.Commands.TURN_OFF, 0x00, 0x00, 0x00 };
+        serialManager.WriteMessage(messageBytes);
+    }
+
+    private void StopSerial()
+    {
+        serialManager.Stop();
+        // Make inputs availible again
+    }
+
+    //= new SerialPort("COM12", 9600, Parity.None, 8, StopBits.One)
+
+
+
+
+}

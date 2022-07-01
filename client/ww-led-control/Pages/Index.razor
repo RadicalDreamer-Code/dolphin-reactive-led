@@ -1,0 +1,112 @@
+﻿@page "/"
+
+<h2>LED Control</h2>
+
+<div>
+    <input type="checkbox" class="btn-check" id="btn-check-outlined" autocomplete="off">
+    <button id="button-connect"
+        class="btn btn-primary"
+        type="button"
+        onclick="@ConnectWithDolphin"
+        disabled="@buttonDisabled"
+    >
+        <span 
+            class="spinner-border spinner-border-sm @ToggleSpinVisibility()"
+            role="status"
+            aria-hidden="true"
+        />
+
+        @buttonConnectText
+    </button>
+    <br />
+</div>
+<br />
+
+<div>
+    @foreach (var offsetData in Common.Data.Offsets)
+    {
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" @onchange="eventArgs => { SelectEvent(offsetData, eventArgs.Value); }" checked>
+            <label class="form-check-label" for="flexSwitchCheckDefault">@offsetData.id</label>
+        </div>
+    }
+</div>
+<br />
+<br />
+<div>
+    @foreach (var offsetData in selectedEvents)
+    {
+        <p>@offsetData.id</p>
+    }
+</div>
+
+@code {
+    public List<Common.Offset> selectedEvents { get; set; } = new List<Common.Offset>();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        var offsets = Common.Data.Offsets;
+        foreach (var offset in offsets)
+        {
+            selectedEvents.Add(offset);
+        }
+    }
+
+    public List<Common.Offset> Events()
+    {
+        var offsets =  Common.Data.Offsets;
+        List<Common.Offset> events = new List<Common.Offset>();
+
+        foreach (var offset in offsets)
+        {
+            events.Add(offset);
+        }
+
+        return events;
+    }
+
+    void SelectEvent(Common.Offset offset, object checkedValue)
+    {
+        if ((bool)checkedValue)
+        {
+            if (!selectedEvents.Contains(offset))
+            {
+                selectedEvents.Add(offset);
+            }
+        }
+        else
+        {
+            if (selectedEvents.Contains(offset))
+            {
+                selectedEvents.Remove(offset);
+            }
+        }
+    }
+
+    private string statusText = "Not connected to Dolphin";
+
+    private bool spinnerHidden = true;
+    string ToggleSpinVisibility() => spinnerHidden ? "visually-hidden" : "";
+
+    private bool buttonDisabled = false;
+    private MarkupString buttonConnectText = (MarkupString)"Connect to Dolphin";
+
+    private void ConnectWithDolphin()
+    {
+        buttonDisabled = true;
+        buttonConnectText = (MarkupString) "Connecting";
+        spinnerHidden = false;
+
+        // Connect Dolphin
+        if(Client.Library.Initialize())
+        {
+            buttonConnectText = (MarkupString)"Connected";
+            spinnerHidden = true;
+        } else {
+            buttonConnectText = (MarkupString)"Error";
+            buttonDisabled = false;
+            spinnerHidden = true;
+        }
+    }
+}
