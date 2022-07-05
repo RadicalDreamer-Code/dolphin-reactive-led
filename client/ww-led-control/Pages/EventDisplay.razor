@@ -1,0 +1,5 @@
+﻿<div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" @onchange="eventArgs => { OnSelectEvent?.Invoke(offsetData, eventArgs.Value); }">
+    <label class="form-check-label" for="flexSwitchCheckDefault">@offsetData.id</label>
+    <div class="spinner-grow spinner-grow-sm @ToggleSpinVisibility()" role="status"></div>
+</div>

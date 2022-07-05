@@ -18,15 +18,23 @@
 
 
 @code {
-    private Client.SerialManager serialManager = new Client.SerialManager();
-    private string[] portnames;
 
+    /* Nicht gemergte Änderung aus Projekt "ww-led-control (net6.0-maccatalyst)"
+    Vor:
+    private Client.SerialManager serialManager = new Client.SerialManager();
+    Nach:
+    private SerialManager serialManager = new Client.SerialManager();
+*/
+
+    private string[] portnames;
+    ww_led_control.Services.SerialManager serialManager;
     private string selectedPortName = "COM12";
     private int selectedBaudRate = 9600;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        serialManager = new Services.SerialManager();
         portnames = serialManager.GetAvailiblePorts();
     }
 
@@ -35,13 +43,27 @@
         if (!serialManager.IsOpen())
             serialManager.Initialize(selectedPortName, selectedBaudRate);
 
+
+/* Nicht gemergte Änderung aus Projekt "ww-led-control (net6.0-maccatalyst)"
+Vor:
         byte[] messageBytes = { (byte) Client.SerialManager.Commands.TURN_ON, 0x00, 0x00, 0x00 };
+Nach:
+        byte[] messageBytes = { (byte) SerialManager.Commands.TURN_ON, 0x00, 0x00, 0x00 };
+*/
+        byte[] messageBytes = { (byte) ww_led_control.Services.SerialManager.Commands.TURN_ON, 0x00, 0x00, 0x00 };
         serialManager.WriteMessage(messageBytes);
     }
 
     private void TurnOffLights()
     {
+
+/* Nicht gemergte Änderung aus Projekt "ww-led-control (net6.0-maccatalyst)"
+Vor:
         byte[] messageBytes = { (byte) Client.SerialManager.Commands.TURN_OFF, 0x00, 0x00, 0x00 };
+Nach:
+        byte[] messageBytes = { (byte) SerialManager.Commands.TURN_OFF, 0x00, 0x00, 0x00 };
+*/
+        byte[] messageBytes = { (byte) ww_led_control.Services.SerialManager.Commands.TURN_OFF, 0x00, 0x00, 0x00 };
         serialManager.WriteMessage(messageBytes);
     }
 

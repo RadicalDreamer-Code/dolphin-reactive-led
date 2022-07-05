@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.WebView.Maui;
 using ww_led_control.Data;
+using ww_led_control.Services;
 
 namespace ww_led_control;
 
@@ -21,7 +22,9 @@ public static class MauiProgram
 #endif
 		
 		builder.Services.AddSingleton<WeatherForecastService>();
+		builder.Services.AddSingleton<Dolphin>();
+        builder.Services.AddSingleton<SerialManager>();
 
-		return builder.Build();
+        return builder.Build();
 	}
 }

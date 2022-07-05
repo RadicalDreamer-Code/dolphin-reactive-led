@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Client
+namespace ww_led_control.Services
 {
     public class SerialManager
     {
@@ -24,8 +24,16 @@ namespace Client
         }
 
         private SerialPort serialPort;
-        
-        public SerialManager() { }
+        private string portName = "COM12";
+        private int baudRate = 9600;
+
+        public SerialManager() {
+            if(true)
+            {
+                Initialize(portName, baudRate);
+            }
+        }
+
         public void Initialize(string portName, int baudRate)
         {
             serialPort = new SerialPort(portName, baudRate, Parity.None, 8, StopBits.One);

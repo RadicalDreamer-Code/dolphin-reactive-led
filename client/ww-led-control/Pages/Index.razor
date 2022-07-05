@@ -1,90 +1,41 @@
 ﻿@page "/"
+@inject Services.Dolphin Dolphin
 
-<h2>LED Control</h2>
+<div class="container">
+    <h2>LED Control</h2>
 
-<div>
-    <input type="checkbox" class="btn-check" id="btn-check-outlined" autocomplete="off">
-    <button id="button-connect"
-        class="btn btn-primary"
-        type="button"
-        onclick="@ConnectWithDolphin"
-        disabled="@buttonDisabled"
-    >
-        <span 
-            class="spinner-border spinner-border-sm @ToggleSpinVisibility()"
-            role="status"
-            aria-hidden="true"
-        />
+    <div class="hook-section">
+        <h5>@statusText</h5>
+        <button id="button-connect"
+                class="btn btn-primary"
+                type="button"
+                onclick="@ConnectWithDolphin"
+                disabled="@buttonDisabled">
+            <span class="spinner-border spinner-border-sm @ToggleSpinVisibility()"
+                  role="status"
+                  aria-hidden="true" />
+            @buttonConnectText
+        </button>
+        <br />
+    </div>
+    <br />
 
-        @buttonConnectText
-    </button>
+    <div class="control-section">
+        @foreach (var offsetData in offsets)
+        {
+            <EventDisplay 
+                offsetData="@offsetData"
+                OnSelectEvent="@SelectEvent"
+            ></EventDisplay>
+        }
+    </div>
+    <br />
     <br />
 </div>
-<br />
 
-<div>
-    @foreach (var offsetData in Common.Data.Offsets)
-    {
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" @onchange="eventArgs => { SelectEvent(offsetData, eventArgs.Value); }" checked>
-            <label class="form-check-label" for="flexSwitchCheckDefault">@offsetData.id</label>
-        </div>
-    }
-</div>
-<br />
-<br />
-<div>
-    @foreach (var offsetData in selectedEvents)
-    {
-        <p>@offsetData.id</p>
-    }
-</div>
 
 @code {
-    public List<Common.Offset> selectedEvents { get; set; } = new List<Common.Offset>();
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        var offsets = Common.Data.Offsets;
-        foreach (var offset in offsets)
-        {
-            selectedEvents.Add(offset);
-        }
-    }
-
-    public List<Common.Offset> Events()
-    {
-        var offsets =  Common.Data.Offsets;
-        List<Common.Offset> events = new List<Common.Offset>();
-
-        foreach (var offset in offsets)
-        {
-            events.Add(offset);
-        }
-
-        return events;
-    }
-
-    void SelectEvent(Common.Offset offset, object checkedValue)
-    {
-        if ((bool)checkedValue)
-        {
-            if (!selectedEvents.Contains(offset))
-            {
-                selectedEvents.Add(offset);
-            }
-        }
-        else
-        {
-            if (selectedEvents.Contains(offset))
-            {
-                selectedEvents.Remove(offset);
-            }
-        }
-    }
-
-    private string statusText = "Not connected to Dolphin";
+    private string statusText = "Currently not hooked to Dolphin";
 
     private bool spinnerHidden = true;
     string ToggleSpinVisibility() => spinnerHidden ? "visually-hidden" : "";
@@ -92,21 +43,82 @@
     private bool buttonDisabled = false;
     private MarkupString buttonConnectText = (MarkupString)"Connect to Dolphin";
 
+    private List<Common.Offset> offsets = new();
+
+    private List<Action> OnEventChangeHandlers = new();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Dolphin.OnChange += OnEventChange;
+    }
+
+
+    // UI
+    void SelectEvent(Common.Offset offset, object checkedValue)
+    {
+        if ((bool)checkedValue)
+        {
+            if (!Dolphin.selectedOffsets.Contains(offset))
+            {
+                Dolphin.selectedOffsets.Add(offset);
+            }
+        }
+        else
+        {
+            if (Dolphin.selectedOffsets.Contains(offset))
+            {
+                Dolphin.selectedOffsets.Remove(offset);
+            }
+        }
+
+        Console.WriteLine(Dolphin.selectedOffsets);
+    }
+
     private void ConnectWithDolphin()
     {
-        buttonDisabled = true;
         buttonConnectText = (MarkupString) "Connecting";
         spinnerHidden = false;
 
         // Connect Dolphin
-        if(Client.Library.Initialize())
+        if (Dolphin.HookEmulator())
         {
+            statusText = "Hooked to Dolphin (Game: The Legend of Zelda Windwaker)";
+
             buttonConnectText = (MarkupString)"Connected";
             spinnerHidden = true;
+
+            GetGameOffsets();
+
         } else {
             buttonConnectText = (MarkupString)"Error";
-            buttonDisabled = false;
             spinnerHidden = true;
         }
+    }
+
+    private void DisconnectDolphin()
+    {
+        // Unhook Emulator
+        RemoveGameOffsets();
+    }
+
+    private void GetGameOffsets()
+    {
+        offsets.Clear();
+        foreach (var offset in Dolphin.offsets)
+        {
+            offsets.Add(offset);
+            //OnEventChangeHandlers.Add();
+        }
+    }
+
+    private void RemoveGameOffsets()
+    {
+        offsets.Clear();
+    }
+
+    private void OnEventChange(Common.OffsetId offsetId)
+    {
+        // show effect on event
     }
 }
