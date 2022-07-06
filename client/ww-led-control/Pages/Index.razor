@@ -21,12 +21,12 @@
     <br />
 
     <div class="control-section">
-        @foreach (var offsetData in offsets)
+        @foreach(var offset in offsets)
         {
-            <EventDisplay 
-                offsetData="@offsetData"
+            <EventDisplay
+                offsetData="@offset"
                 OnSelectEvent="@SelectEvent"
-            ></EventDisplay>
+            />
         }
     </div>
     <br />
@@ -45,6 +45,7 @@
 
     private List<Common.Offset> offsets = new();
 
+    private List<EventDisplay> EventDisplays = new();
     private List<Action> OnEventChangeHandlers = new();
 
     protected override void OnInitialized()
@@ -87,9 +88,7 @@
 
             buttonConnectText = (MarkupString)"Connected";
             spinnerHidden = true;
-
             GetGameOffsets();
-
         } else {
             buttonConnectText = (MarkupString)"Error";
             spinnerHidden = true;
@@ -107,6 +106,7 @@
         offsets.Clear();
         foreach (var offset in Dolphin.offsets)
         {
+            EventDisplays.Add(new EventDisplay());
             offsets.Add(offset);
             //OnEventChangeHandlers.Add();
         }
@@ -120,5 +120,7 @@
     private void OnEventChange(Common.OffsetId offsetId)
     {
         // show effect on event
+        Console.WriteLine(offsetId);
+        var eventDisplay = EventDisplays.Find(x => x.offsetData.id == offsetId);
     }
 }

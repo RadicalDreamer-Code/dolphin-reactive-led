@@ -1,9 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ww_led_control.Services;
 
 namespace ww_led_control.Pages
 {
@@ -16,18 +12,29 @@ namespace ww_led_control.Pages
         [Parameter] 
         public Action<Common.Offset, object> OnSelectEvent { get; set; }
 
-        [Parameter]
-        public Action OnEventChange { get; set; }
 
         private string ToggleSpinVisibility() => runningSpinner ? "" : "visually-hidden";
 
-        public async void Animate()
+        public async void Animate(Common.OffsetId offsetId)
         {
             Console.WriteLine("Animate");
-            runningSpinner = true;
-            await Task.Delay(2000);
-            runningSpinner = false;
+            if (offsetData.id != offsetId)
+                return;
 
+            if (runningSpinner)
+                return;
+
+            System.Diagnostics.Debug.Print(offsetId.ToString());
+            runningSpinner = true;
+            await InvokeAsync(StateHasChanged);
+            await Task.Delay(TimeSpan.FromSeconds(2));
+            runningSpinner = false;
+            await InvokeAsync(StateHasChanged);
+        }
+
+        protected override void OnInitialized()
+        {
+            Dolphin.OnChange += Animate;
         }
 
     }
