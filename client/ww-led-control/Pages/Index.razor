@@ -7,9 +7,9 @@
     <div class="hook-section">
         <h5>@statusText</h5>
         <button id="button-connect"
-                class="btn btn-primary"
+                class="btn @ToggleButtonColor()"
                 type="button"
-                onclick="@ConnectWithDolphin"
+                onclick="@OnButtonClickConnect"
                 disabled="@buttonDisabled">
             <span class="spinner-border spinner-border-sm @ToggleSpinVisibility()"
                   role="status"
@@ -35,92 +35,12 @@
 
 
 @code {
-    private string statusText = "Currently not hooked to Dolphin";
+    const string STATUS_NOT_HOOKED = "Currently not hooked to Dolphin";
+    const string STATUS_RETRY = "Couldn't hook to Dolphin";
+    const string STATUS_SUCCESS = "Hooked to Dolphin";
 
-    private bool spinnerHidden = true;
-    string ToggleSpinVisibility() => spinnerHidden ? "visually-hidden" : "";
-
-    private bool buttonDisabled = false;
-    private MarkupString buttonConnectText = (MarkupString)"Connect to Dolphin";
-
-    private List<Common.Offset> offsets = new();
-
-    private List<EventDisplay> EventDisplays = new();
-    private List<Action> OnEventChangeHandlers = new();
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        Dolphin.OnChange += OnEventChange;
-    }
-
-
-    // UI
-    void SelectEvent(Common.Offset offset, object checkedValue)
-    {
-        if ((bool)checkedValue)
-        {
-            if (!Dolphin.selectedOffsets.Contains(offset))
-            {
-                Dolphin.selectedOffsets.Add(offset);
-            }
-        }
-        else
-        {
-            if (Dolphin.selectedOffsets.Contains(offset))
-            {
-                Dolphin.selectedOffsets.Remove(offset);
-            }
-        }
-
-        Console.WriteLine(Dolphin.selectedOffsets);
-    }
-
-    private void ConnectWithDolphin()
-    {
-        buttonConnectText = (MarkupString) "Connecting";
-        spinnerHidden = false;
-
-        // Connect Dolphin
-        if (Dolphin.HookEmulator())
-        {
-            statusText = "Hooked to Dolphin (Game: The Legend of Zelda Windwaker)";
-
-            buttonConnectText = (MarkupString)"Connected";
-            spinnerHidden = true;
-            GetGameOffsets();
-        } else {
-            buttonConnectText = (MarkupString)"Error";
-            spinnerHidden = true;
-        }
-    }
-
-    private void DisconnectDolphin()
-    {
-        // Unhook Emulator
-        RemoveGameOffsets();
-    }
-
-    private void GetGameOffsets()
-    {
-        offsets.Clear();
-        foreach (var offset in Dolphin.offsets)
-        {
-            EventDisplays.Add(new EventDisplay());
-            offsets.Add(offset);
-            //OnEventChangeHandlers.Add();
-        }
-    }
-
-    private void RemoveGameOffsets()
-    {
-        offsets.Clear();
-    }
-
-    private void OnEventChange(Common.OffsetId offsetId)
-    {
-        // show effect on event
-        Console.WriteLine(offsetId);
-        var eventDisplay = EventDisplays.Find(x => x.offsetData.id == offsetId);
-    }
+    const string BUTTON_TEXT_CONNECT = "Connect to Dolphin";
+    const string BUTTON_TEXT_CONNECTING = "Connecting";
+    const string BUTTON_TEXT_RETRY = "Try again";
+    const string BUTTON_TEXT_DISCONNECT = "Disconnect";
 }
