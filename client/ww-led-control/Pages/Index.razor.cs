@@ -10,6 +10,7 @@ namespace ww_led_control.Pages
     public partial class Index
     {
         private string statusText = STATUS_NOT_HOOKED;
+        private MarkupString buttonConnectText = (MarkupString)BUTTON_TEXT_CONNECT;
 
         private bool spinnerHidden = true;
         private bool buttonClassToggle = true;
@@ -17,7 +18,6 @@ namespace ww_led_control.Pages
         private string ToggleButtonColor() => buttonClassToggle ? "btn-primary" : "btn-danger";
 
         private bool buttonDisabled = false;
-        private MarkupString buttonConnectText = (MarkupString)BUTTON_TEXT_CONNECT;
 
         private List<Common.Offset> offsets = new();
 
@@ -89,6 +89,7 @@ namespace ww_led_control.Pages
             // Unhook Emulator
             Dolphin.UnhookEmulator();
             Dolphin.OnChange -= OnEventChange;
+            Dolphin.selectedOffsets.Clear();
             RemoveGameOffsets();
 
             statusText = STATUS_NOT_HOOKED;
@@ -115,6 +116,7 @@ namespace ww_led_control.Pages
             spinnerHidden = true;
         }
 
+
         private void SetDolphin()
         {
             statusText = $"{STATUS_SUCCESS} (Game: {Dolphin.activeGame})";
@@ -128,7 +130,6 @@ namespace ww_led_control.Pages
             foreach (var offset in Dolphin.offsets)
             {
                 offsets.Add(offset);
-                //OnEventChangeHandlers.Add();
             }
         }
 
@@ -139,8 +140,7 @@ namespace ww_led_control.Pages
 
         private void OnEventChange(Common.OffsetId offsetId)
         {
-            // show effect on event
-            System.Diagnostics.Debug.WriteLine("SPORTACUS");
+            // System.Diagnostics.Debug.WriteLine("SPORTACUS");
         }
     }
 }

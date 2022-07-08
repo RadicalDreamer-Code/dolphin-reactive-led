@@ -23,10 +23,8 @@
     <div class="control-section">
         @foreach(var offset in offsets)
         {
-            <EventDisplay
-                offsetData="@offset"
-                OnSelectEvent="@SelectEvent"
-            />
+            <EventDisplay offsetData="@offset"
+                      OnSelectEvent="@SelectEvent" />
         }
     </div>
     <br />
