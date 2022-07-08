@@ -24,30 +24,36 @@ namespace ww_led_control.Services
         }
 
         private SerialPort serialPort;
+        private bool started = false;
         private string portName = "COM12";
         private int baudRate = 9600;
 
-        public SerialManager() {
-            if(true)
-            {
-                Initialize(portName, baudRate);
-            }
-        }
+        public SerialManager() {}
 
-        public void Initialize(string portName, int baudRate)
+        public bool Initialize(string portName, int baudRate)
         {
-            serialPort = new SerialPort(portName, baudRate, Parity.None, 8, StopBits.One);
-            serialPort.DataReceived += new
-                SerialDataReceivedEventHandler(PortDataReceived);
-            serialPort.Open();
+            if (IsOpen())
+                return true;
+
+            try
+            {
+                serialPort = new SerialPort(portName, baudRate, Parity.None, 8, StopBits.One);
+                serialPort.DataReceived += new
+                    SerialDataReceivedEventHandler(PortDataReceived);
+                serialPort.Open();
+            } catch
+            {
+                return false;
+            }
+            return true;
         }
 
         public void WriteMessage(byte[] messageBytes)
         {
-            if (!serialPort.IsOpen)
+            if (!IsOpen())
                 return;
 
-            Console.WriteLine("Sending Command: " + messageBytes[0]);
+            System.Diagnostics.Debug.WriteLine("Sending Command: " + messageBytes[0]);
             serialPort.Write(messageBytes, 0, 4);
         }
         private void PortDataReceived(object sender,
@@ -64,13 +70,26 @@ namespace ww_led_control.Services
             */
         }
 
+        public bool GetPortState()
+        {
+            return serialPort.IsOpen;
+        }
+
         public void Stop()
         {
+            if (!serialPort.IsOpen)
+                return;
+
             serialPort.Close();
+            serialPort.DataReceived -= new
+                    SerialDataReceivedEventHandler(PortDataReceived);
         }
 
         public bool IsOpen()
         {
+            if(serialPort == null)
+                return false;
+
             return serialPort.IsOpen;
         }
 

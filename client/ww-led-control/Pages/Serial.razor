@@ -1,81 +1,112 @@
 ﻿@page "/serial"
+@inject Services.SerialManager serialManager
 
 <h1>Serial Port</h1>
 
 <label>Select Port: </label>
-<select class="form-select" name="port">
+<select class="form-select" name="port" disabled="@inputDisabled" onchange="@OnPortSelect">
     @foreach (var portName in portnames)
     {
-        <option value="@portName">@portName</option>
+        <option 
+            value="@portName"
+        >@portName</option>
     }
 </select>
 <br />
 <label>Baud-Rate: </label>
-<input type="text" class="form-control" placeholder="BaudRate" aria-label="baudRate" aria-describedby="basic-addon1" value="9600"><br />
-<button type="button" class="btn btn-success" onclick="@RunSerial">Run</button>
-<button type="button" class="btn btn-success" onclick="@RunSerial">Stop</button>
-<button type="button" class="btn btn-error" onclick="@TurnOffLights">Turn off lights</button>
+<select class="form-select" disabled="@inputDisabled" onchange="@OnBaudRateSelect">
+    @foreach (var rate in baudRates)
+    {
+        <option 
+            value="@rate"
+        >@rate</option>
+    }
+</select>
+<br />
+<label>@message</label>
+<br />
+<div>
+    <button type="button" class="btn btn-success" onclick="@RunSerial">Run</button>
+    <button type="button" class="btn btn-success" onclick="@StopSerial">Stop</button>
+    <button type="button" class="btn btn-error" onclick="@TurnOnLights">Turn on lights</button>
+    <button type="button" class="btn btn-error" onclick="@TurnOffLights">Turn off lights</button>
+</div>
 
 
 @code {
+    const string STATUS_NOT_OPEN = "Serial port is not open";
+    const string STATUS_ERROR = "Error while trying to open serial port";
+    const string STATUS_CONNECTED = "Open!";
 
-    /* Nicht gemergte Änderung aus Projekt "ww-led-control (net6.0-maccatalyst)"
-    Vor:
-    private Client.SerialManager serialManager = new Client.SerialManager();
-    Nach:
-    private SerialManager serialManager = new Client.SerialManager();
-*/
+    private bool inputDisabled = false;
 
+    private int[] baudRates = { 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 31250, 38400, 57600, 115200 };
     private string[] portnames;
-    ww_led_control.Services.SerialManager serialManager;
-    private string selectedPortName = "COM12";
-    private int selectedBaudRate = 9600;
+    private string selectedPortName;
+    private int selectedBaudRate;
+
+    private string message = STATUS_NOT_OPEN;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        serialManager = new Services.SerialManager();
         portnames = serialManager.GetAvailiblePorts();
+
+        // check state of serial port
+        if (serialManager.IsOpen())
+        {
+
+            inputDisabled = true;
+            message = STATUS_CONNECTED;
+        }
+    }
+
+    private void OnPortSelect(ChangeEventArgs e)
+    {
+        System.Diagnostics.Debug.WriteLine(e.Value.ToString());
+        selectedPortName = e.Value.ToString();
+    }
+
+    private void OnBaudRateSelect(ChangeEventArgs e)
+    {
+        System.Diagnostics.Debug.WriteLine(e.Value.ToString());
+        selectedBaudRate = Int16.Parse(e.Value.ToString());
     }
 
     private void RunSerial()
     {
-        if (!serialManager.IsOpen())
-            serialManager.Initialize(selectedPortName, selectedBaudRate);
+        if (serialManager.IsOpen())
+            return;
 
+        if(!serialManager.Initialize(selectedPortName, selectedBaudRate))
+        {
+            // TODO: Show error message
+            message = STATUS_ERROR;
+            return;
+        }
 
-/* Nicht gemergte Änderung aus Projekt "ww-led-control (net6.0-maccatalyst)"
-Vor:
-        byte[] messageBytes = { (byte) Client.SerialManager.Commands.TURN_ON, 0x00, 0x00, 0x00 };
-Nach:
-        byte[] messageBytes = { (byte) SerialManager.Commands.TURN_ON, 0x00, 0x00, 0x00 };
-*/
+        // disable buttons
+        inputDisabled = true;
         byte[] messageBytes = { (byte) ww_led_control.Services.SerialManager.Commands.TURN_ON, 0x00, 0x00, 0x00 };
         serialManager.WriteMessage(messageBytes);
     }
 
     private void TurnOffLights()
     {
-
-/* Nicht gemergte Änderung aus Projekt "ww-led-control (net6.0-maccatalyst)"
-Vor:
-        byte[] messageBytes = { (byte) Client.SerialManager.Commands.TURN_OFF, 0x00, 0x00, 0x00 };
-Nach:
-        byte[] messageBytes = { (byte) SerialManager.Commands.TURN_OFF, 0x00, 0x00, 0x00 };
-*/
         byte[] messageBytes = { (byte) ww_led_control.Services.SerialManager.Commands.TURN_OFF, 0x00, 0x00, 0x00 };
+        serialManager.WriteMessage(messageBytes);
+    }
+
+    private void TurnOnLights()
+    {
+        byte[] messageBytes = { (byte)ww_led_control.Services.SerialManager.Commands.TURN_ON, 0x00, 0x00, 0x00 };
         serialManager.WriteMessage(messageBytes);
     }
 
     private void StopSerial()
     {
         serialManager.Stop();
+        inputDisabled = false;
         // Make inputs availible again
     }
-
-    //= new SerialPort("COM12", 9600, Parity.None, 8, StopBits.One)
-
-
-
-
 }
