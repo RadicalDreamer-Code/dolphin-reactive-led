@@ -55,7 +55,6 @@
         // check state of serial port
         if (serialManager.IsOpen())
         {
-
             inputDisabled = true;
             message = STATUS_CONNECTED;
         }
@@ -86,6 +85,7 @@
         }
 
         // disable buttons
+        message = STATUS_CONNECTED;
         inputDisabled = true;
         byte[] messageBytes = { (byte) ww_led_control.Services.SerialManager.Commands.TURN_ON, 0x00, 0x00, 0x00 };
         serialManager.WriteMessage(messageBytes);
@@ -106,6 +106,7 @@
     private void StopSerial()
     {
         serialManager.Stop();
+        message = STATUS_NOT_OPEN;
         inputDisabled = false;
         // Make inputs availible again
     }

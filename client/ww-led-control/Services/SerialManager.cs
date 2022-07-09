@@ -24,11 +24,9 @@ namespace ww_led_control.Services
         }
 
         private SerialPort serialPort;
-        private bool started = false;
-        private string portName = "COM12";
-        private int baudRate = 9600;
 
-        public SerialManager() {}
+        public event Action<bool> OnSerialOpen;
+        public void NotifySerialChange(bool open) => OnSerialOpen?.Invoke(open);
 
         public bool Initialize(string portName, int baudRate)
         {
@@ -41,9 +39,11 @@ namespace ww_led_control.Services
                 serialPort.DataReceived += new
                     SerialDataReceivedEventHandler(PortDataReceived);
                 serialPort.Open();
-            } catch
-            {
+
+                NotifySerialChange(serialPort.IsOpen);
+            } catch {
                 return false;
+                NotifySerialChange(serialPort.IsOpen);
             }
             return true;
         }
@@ -77,12 +77,13 @@ namespace ww_led_control.Services
 
         public void Stop()
         {
-            if (!serialPort.IsOpen)
+            if (serialPort == null || !serialPort.IsOpen)
                 return;
 
             serialPort.Close();
             serialPort.DataReceived -= new
                     SerialDataReceivedEventHandler(PortDataReceived);
+            NotifySerialChange(serialPort.IsOpen);
         }
 
         public bool IsOpen()
