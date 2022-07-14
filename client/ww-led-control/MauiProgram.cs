@@ -22,8 +22,12 @@ public static class MauiProgram
 #endif
 		
 		builder.Services.AddSingleton<WeatherForecastService>();
-		builder.Services.AddSingleton<Dolphin>();
         builder.Services.AddSingleton<SerialManager>();
+		builder.Services.AddSingleton<Dolphin>(s =>
+		{
+			var serialManager = s.GetRequiredService<SerialManager>();
+			return new Dolphin(serialManager);
+		});
 
         return builder.Build();
 	}

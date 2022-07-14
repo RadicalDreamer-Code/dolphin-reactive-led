@@ -9,6 +9,7 @@
     {
         <option 
             value="@portName"
+            selected="@(portName == selectedPortName)"
         >@portName</option>
     }
 </select>
@@ -19,6 +20,7 @@
     {
         <option 
             value="@rate"
+            selected="@(rate == selectedBaudRate)"
         >@rate</option>
     }
 </select>
@@ -55,6 +57,8 @@
         // check state of serial port
         if (serialManager.IsOpen())
         {
+            selectedPortName = serialManager.GetPortName();
+            selectedBaudRate = serialManager.GetBaudRate();
             inputDisabled = true;
             message = STATUS_CONNECTED;
         }

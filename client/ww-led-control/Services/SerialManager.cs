@@ -70,10 +70,10 @@ namespace ww_led_control.Services
             */
         }
 
-        public bool GetPortState()
-        {
-            return serialPort.IsOpen;
-        }
+        public bool GetPortState() => serialPort.IsOpen;
+        public string GetPortName() => serialPort.PortName;
+        public int GetBaudRate() => serialPort.BaudRate;
+        
 
         public void Stop()
         {

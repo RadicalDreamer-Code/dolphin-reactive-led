@@ -10,13 +10,15 @@
         public IReadOnlyCollection<Common.Offset> offsets = Common.Data.Offsets;
         public List<Common.Offset> selectedOffsets = new List<Common.Offset>();
 
-        public Dolphin()
+        private SerialManager _serialManager { get; set; }
+
+        public Dolphin(SerialManager serialManager)
         {
+            _serialManager = serialManager;
             if (DEBUG)
             {
                 emulatorIsHooked = HookEmulator();
             }
-
         }
 
         public bool HookEmulator()
@@ -72,7 +74,8 @@
                 return;
 
             // Get Serial Event
-
+            byte[] messageBytes = { (byte) SerialManager.Commands.TURN_ON, 0x00, 0x00, 0x00 };
+            _serialManager.WriteMessage(messageBytes);
             NotifyDataChanged(Common.OffsetId.ACTIVEWINDWAKERNOTES);
         }
 
