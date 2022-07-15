@@ -8,6 +8,6 @@
         checked="@selected"
         @onchange="eventArgs => { OnSelectEvent?.Invoke(offsetData, eventArgs.Value);
     }">
-    <label class="form-check-label" for="flexSwitchCheckDefault">@offsetData.id</label>
+    <label class="form-check-label" for="flexSwitchCheckDefault">@offsetData.description</label>
     <div class="spinner-grow spinner-grow-sm @ToggleSpinVisibility()" role="status"></div>
 </div>

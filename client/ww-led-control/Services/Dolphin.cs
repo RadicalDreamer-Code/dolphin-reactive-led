@@ -5,9 +5,9 @@
         private bool DEBUG = false;
 
         public bool emulatorIsHooked;
-        public string activeGame = "The Legend of Zelda Windwaker (NTSC)";
+        public string activeGame = "";
 
-        public IReadOnlyCollection<Common.Offset> offsets = Common.Data.Offsets;
+        public IReadOnlyCollection<Common.Offset> offsets = Common.Data.WW_Offsets;
         public List<Common.Offset> selectedOffsets = new List<Common.Offset>();
 
         private SerialManager _serialManager { get; set; }
@@ -32,6 +32,7 @@
             // get offsets by game
             if (emulatorIsHooked)
             {
+                activeGame = Client.Library.game.name;
                 HookEventsByGame();
             }
             
@@ -70,29 +71,29 @@
         // wind waker specific events
         private void OnWindwakerBeat()
         {
-            if (!IsSelected(Common.OffsetId.ACTIVEWINDWAKERNOTES))
+            if (!IsSelected(Common.OffsetId.WW_ACTIVEWINDWAKERNOTES))
                 return;
 
             // Get Serial Event
             byte[] messageBytes = { (byte) SerialManager.Commands.TURN_ON, 0x00, 0x00, 0x00 };
             _serialManager.WriteMessage(messageBytes);
-            NotifyDataChanged(Common.OffsetId.ACTIVEWINDWAKERNOTES);
+            NotifyDataChanged(Common.OffsetId.WW_ACTIVEWINDWAKERNOTES);
         }
 
         private void OnHealthChanged(byte health)
         {
-            if (!IsSelected(Common.OffsetId.CURRENTHEALTH))
+            if (!IsSelected(Common.OffsetId.WW_CURRENTHEALTH))
                 return;
 
-            NotifyDataChanged(Common.OffsetId.CURRENTHEALTH);
+            NotifyDataChanged(Common.OffsetId.WW_CURRENTHEALTH);
         }
 
         private void OnDoorOpen()
         {
-            if (!IsSelected(Common.OffsetId.EVENTCONTROL))
+            if (!IsSelected(Common.OffsetId.WW_EVENTCONTROL))
                 return;
 
-            NotifyDataChanged(Common.OffsetId.EVENTCONTROL);
+            NotifyDataChanged(Common.OffsetId.WW_EVENTCONTROL);
         }
 
         public event Action<Common.OffsetId> OnChange;
